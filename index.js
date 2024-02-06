@@ -23,7 +23,7 @@ app.get("/users" , (req , res) => {
 
 app.post("/login" , (req , res) => {
     const queryData = req.body
-    connection.query(`select * from user where email = '${queryData?.email}' and password = '${queryData?.password}'` , (err,results) => {
+    connection.query(`select * from user where email = '${queryData.email}' and password = '${queryData.password}'` , (err,results) => {
         if(results){
             res.json({ data : results[0]})
         }else{

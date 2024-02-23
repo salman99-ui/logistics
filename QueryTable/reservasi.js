@@ -1,0 +1,2 @@
+const table = "create table reservasi(id INT NOT NULL AUTO_INCREMENT , user_id INT NOT NULL , nama VARCHAR(255) NOT NULL , email VARCHAR(255) NOT NULL , alamat VARCHAR(255) NOT NULL, date DATE, status ENUM('WAITING','PROCESS','DONE') ,primary key (id));"
+const insert = "insert into reservasi(user_id,nama,email,alamat,date,status) values('2','joko','joko@gmail.com','mauk','2023/02/12','WAITING');"

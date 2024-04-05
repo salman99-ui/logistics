@@ -1,6 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const connection = require("./database");
+import express from "express";
+import cors from "cors";
+import { Xendit, PaymentRequest as PaymentRequestClient } from "xendit-node";
+import connection from "./database/index.js";
 
 const app = express();
 
@@ -18,7 +19,6 @@ app.get("/users", (req, res) => {
       });
     }
   });
-  connection.end();
 });
 
 app.get("/profile/:id", (req, res) => {
@@ -68,6 +68,7 @@ app.post("/create-user", (req, res) => {
 });
 
 app.post("/reservasi", (req, res) => {
+  // select * from reservasi left join item_part on reservasi.id = item_part.id_reservasi;
   const { user_id, nama, email, alamat, date } = req.body;
   connection.query(
     `select * from day_count where date = '${date}'`,
@@ -97,21 +98,16 @@ app.post("/reservasi", (req, res) => {
         connection.query(
           `insert into day_count (date,count) values('${date}',1)`,
           (err, results) => {
-            console.log(err, "101");
             if (err) {
               res.json({ message: "error" });
-              console.log("err 3");
             } else {
-              console.log("masuk sini");
               connection.query(
                 `insert into reservasi(user_id,nama,email,alamat,date,status) values(${user_id},'${nama}','${email}','${alamat}','${date}','WAITING')`,
                 (errInsert, resultsInsert) => {
                   if (errInsert) {
-                    console.log(errInsert);
                     res.json({ message: "error" });
                   } else {
-                    console.log("masukkk");
-                    res.json({ message: "OK" });
+                    res.json({ message: "OK", id: resultsInsert?.insertId });
                   }
                 }
               );
@@ -122,6 +118,80 @@ app.post("/reservasi", (req, res) => {
     }
   );
 });
+
+app.get("/reservasi/:id", (req, res) => {
+  const { id } = req.params;
+  connection.query(
+    `select reservasi.* , payment.id as p_id, payment.status as p_status, payment.external_id as p_external_id , payment.va as p_va , payment.id_reservasi as p_id_reservasi , payment.va , payment.bank_code , payment.price , payment.status as p_status from reservasi left join payment on reservasi.id = payment.id_reservasi where reservasi.id = ${id}`,
+    (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        res.json({
+          data: results[0],
+        });
+      }
+    }
+  );
+});
+
+app.post("/create-va", async (req, res) => {
+  const { id_payment, account_number, bank_code , external_id } = req.body;
+
+  connection.query(
+    `update payment set status = 'WAITING',external_id = '${external_id}', va = '${account_number}', bank_code = '${bank_code}' where id_reservasi = ${id_payment} `,
+    (err, responseData) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        res.json({ data: "success" });
+      }
+    }
+  );
+});
+
+app.post("/create-payment", (req, res) => {
+  const { id, external_id, amount } = req.body;
+  connection.query(
+    `insert into payment(id_reservasi,external_id,price) values(${id},${external_id},${amount})`,
+    (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        // update is have VA
+        connection.query(
+          `update reservasi set is_create_va = 1 where id = ${id}`,
+          (errReservasi, resultsReservasi) => {
+            if (errReservasi) {
+              res.json({ message: "error update reservasi" });
+            } else {
+              res.json({ message: "success create payment" });
+            }
+          }
+        );
+      }
+    }
+  );
+});
+
+app.post("/xendit-payment", (req, res) => {
+  const { external_id } = req.body;
+
+  connection.query(
+    `update payment set status = 'DONE' where external_id = '${external_id}'`,
+    (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        res.json({ message: "succss" });
+      }
+    }
+  );
+});
+
+// app.post("/update-payment", (req, res) => {
+//   const { external_id, account_number, expected_amount, bank_code } = req.body;
+// });
 
 app.get("/transaction-history/:user_id", (req, res) => {
   const { user_id } = req.params;
@@ -148,37 +218,60 @@ app.get("/transaction-history", (req, res) => {
   });
 });
 
-app.put("/update-status/:id", (req, res) => {
-  const { id } = req.params;
-  connection.query(
-    `UPDATE reservasi set status = 'PROCESS' where id = ${id}`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({ data: results });
-      }
-    }
-  );
-});
-
 app.post("/update-reservasi/:id", (req, res) => {
   const { id } = req.params;
-  const { parts } = req.body;
+  const { status, parts, price } = req.body;
 
-  parts?.forEach((item, index) => {
+  if (status === "process") {
     connection.query(
-      `INSERT INTO item_part(id_reservasi,part,qty,price) values(${id},'${item?.part}',${item?.qty},${item?.price})`,
+      `UPDATE reservasi set status = 'PROCESS' where id = ${id}`,
       (err, results) => {
         if (err) {
           res.json({ message: "error" });
-        }
-        if (parts.length === index + 1) {
-          res.json({ message: "success" });
+        } else {
+          res.json({
+            message: "success",
+          });
         }
       }
     );
-  });
+  } else {
+    let stringSQL = "INSERT INTO item_part(id_reservasi,part,qty,price) Values";
+    parts?.forEach((item, index) => {
+      stringSQL += `(${id},'${item?.part}',${item?.qty},${item?.price})${
+        parts.length !== index + 1 ? "," : ""
+      }`;
+    });
+
+    connection.query(stringSQL, (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      }
+      if (results) {
+        connection.query(
+          `UPDATE reservasi set status = 'DONE' , amount = ${price} where id = ${id}`,
+          (errUpdate, results) => {
+            if (errUpdate) {
+              res.json({ message: "error" });
+            } else {
+              connection.query(
+                `insert into payment(id_reservasi,status,price) values(${id},'WAITING',${price})`,
+                (errP, responseP) => {
+                  if (errP) {
+                    res.json({ message: "error disni" });
+                  } else {
+                    res.json({
+                      message: "success",
+                    });
+                  }
+                }
+              );
+            }
+          }
+        );
+      }
+    });
+  }
 });
 
 app.listen(4000, () => {

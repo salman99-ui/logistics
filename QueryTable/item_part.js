@@ -1,1 +1,1 @@
-const table = "create table item_part(id INT NOT NULL AUTO_INCREMENT, id_reservasi INT NOT NULL , part varchar(255) NOT NULL, qty INT NOT NULL, price INT NOT NULL)"
+const table = "create table item_part(id INT NOT NULL AUTO_INCREMENT, id_reservasi INT NOT NULL , part varchar(255) NOT NULL, qty INT NOT NULL, price INT NOT NULL , primary key(id))"

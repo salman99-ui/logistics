@@ -237,8 +237,8 @@ app.post("/update-reservasi/:id", (req, res) => {
     );
   } else {
     let stringSQL = "INSERT INTO item_part(id_reservasi,part,qty,price) Values";
-    parts?.forEach((item, index) => {
-      stringSQL += `(${id},'${item?.part}',${item?.qty},${item?.price})${
+    parts.forEach((item, index) => {
+      stringSQL += `(${id},'${item.part}',${item.qty},${item.price})${
         parts.length !== index + 1 ? "," : ""
       }`;
     });

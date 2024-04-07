@@ -107,7 +107,7 @@ app.post("/reservasi", (req, res) => {
                   if (errInsert) {
                     res.json({ message: "error" });
                   } else {
-                    res.json({ message: "OK", id: resultsInsert?.insertId });
+                    res.json({ message: "OK", id: resultsInsert.insertId });
                   }
                 }
               );

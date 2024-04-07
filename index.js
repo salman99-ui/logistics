@@ -175,6 +175,7 @@ app.post("/create-payment", (req, res) => {
 });
 
 app.post("/xendit-payment", (req, res) => {
+  console.log(req.body);
   const { external_id } = req.body;
 
   connection.query(

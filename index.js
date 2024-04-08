@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import { Xendit, PaymentRequest as PaymentRequestClient } from "xendit-node";
 import connection from "./database/index.js";
 
 const app = express();
@@ -135,6 +134,37 @@ app.get("/reservasi/:id", (req, res) => {
   );
 });
 
+app.get("/total-transaksi/payment", (req, res) => {
+  connection.query(
+    `select sum(price) as total from payment where status = 'DONE'`,
+    (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        res.json({
+          data: results[0].total,
+        });
+      }
+    }
+  );
+});
+
+app.get("/total-transaksi", (req, res) => {
+  connection.query(
+    `select count(*) as total from payment where status = 'DONE'`,
+    (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        res.json({
+          data: results[0].total,
+        });
+      }
+    }
+  );
+});
+
+
 app.post("/create-va", async (req, res) => {
   const { id_payment, account_number, bank_code , external_id } = req.body;
 
@@ -209,7 +239,7 @@ app.get("/transaction-history/:user_id", (req, res) => {
 });
 
 app.get("/transaction-history", (req, res) => {
-  connection.query(`select * from reservasi`, (err, results) => {
+  connection.query(`select reservasi.* , payment.status as p_status from reservasi left join payment on reservasi.id = payment.id_reservasi;`, (err, results) => {
     if (err) {
       res.json({ message: "error" });
     } else {

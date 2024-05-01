@@ -1,8 +1,13 @@
 import express from "express";
 import cors from "cors";
 import connection from "./database/index.js";
+import nodemailer from "nodemailer";
+import { getTemplateEmail } from "./constant/index.js";
 
 const app = express();
+
+const email_gmail = "slmndamanhuri@gmail.com";
+const pass_gmail = "nwco ilfz xrnt otxz";
 
 app.use(cors());
 app.use(express.json());
@@ -66,6 +71,32 @@ app.post("/create-user", (req, res) => {
   connection.end();
 });
 
+// app.post("/test-email", (req, res) => {
+//   const email = "slmndamanhuri@gmail.com";
+//   const transport = nodemailer.createTransport({
+//     port: 465, // true for 465, false for other ports
+//     host: "smtp.gmail.com",
+//     auth: {
+//       user: "slmndamanhuri@gmail.com",
+//       pass: "nwco ilfz xrnt otxz",
+//     },
+//     secure: true,
+//   });
+
+//   transport
+//     .sendMail(getTemplateEmail(email))
+//     .then(() => {
+//       res.json({
+//         message: "OK",
+//       });
+//     })
+//     .catch(() => {
+//       res.json({
+//         message: "ERROR",
+//       });
+//     });
+// });
+
 app.post("/reservasi", (req, res) => {
   // select * from reservasi left join item_part on reservasi.id = item_part.id_reservasi;
   const { user_id, nama, email, alamat, date } = req.body;
@@ -106,7 +137,30 @@ app.post("/reservasi", (req, res) => {
                   if (errInsert) {
                     res.json({ message: "error" });
                   } else {
-                    res.json({ message: "OK", id: resultsInsert.insertId });
+                    const transport = nodemailer.createTransport({
+                      port: 465, // true for 465, false for other ports
+                      host: "smtp.gmail.com",
+                      auth: {
+                        user: email_gmail,
+                        pass: pass_gmail,
+                      },
+                      secure: true,
+                    });
+
+                    transport
+                      .sendMail(getTemplateEmail(email))
+                      .then(() => {
+                        console.log("success");
+                        res.json({
+                          message: "OK",
+                          id: resultsInsert.insertId,
+                        });
+                      })
+                      .catch(() => {
+                        res.json({
+                          message: "ERROR",
+                        });
+                      });
                   }
                 }
               );
@@ -164,9 +218,8 @@ app.get("/total-transaksi", (req, res) => {
   );
 });
 
-
 app.post("/create-va", async (req, res) => {
-  const { id_payment, account_number, bank_code , external_id } = req.body;
+  const { id_payment, account_number, bank_code, external_id } = req.body;
 
   connection.query(
     `update payment set status = 'WAITING',external_id = '${external_id}', va = '${account_number}', bank_code = '${bank_code}' where id_reservasi = ${id_payment} `,
@@ -214,7 +267,27 @@ app.post("/xendit-payment", (req, res) => {
       if (err) {
         res.json({ message: "error" });
       } else {
-        res.json({ message: "succss" });
+        const transport = nodemailer.createTransport({
+          port: 465, // true for 465, false for other ports
+          host: "smtp.gmail.com",
+          auth: {
+            user: email_gmail,
+            pass: pass_gmail,
+          },
+          secure: true,
+        });
+
+        transport
+          .sendMail(getTemplateEmailPembayaran(email))
+          .then(() => {
+            console.log("success");
+            res.json({ message: "success payment" });
+          })
+          .catch(() => {
+            res.json({
+              message: "ERROR",
+            });
+          });
       }
     }
   );
@@ -240,13 +313,16 @@ app.get("/transaction-history/:user_id", (req, res) => {
 });
 
 app.get("/transaction-history", (req, res) => {
-  connection.query(`select reservasi.* , payment.status as p_status from reservasi left join payment on reservasi.id = payment.id_reservasi;`, (err, results) => {
-    if (err) {
-      res.json({ message: "error" });
-    } else {
-      res.json({ data: results });
+  connection.query(
+    `select reservasi.* , payment.status as p_status from reservasi left join payment on reservasi.id = payment.id_reservasi;`,
+    (err, results) => {
+      if (err) {
+        res.json({ message: "error" });
+      } else {
+        res.json({ data: results });
+      }
     }
-  });
+  );
 });
 
 app.post("/update-reservasi/:id", (req, res) => {

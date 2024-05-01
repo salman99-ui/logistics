@@ -277,6 +277,8 @@ app.post("/xendit-payment", (req, res) => {
             } else {
               const id_reservasi = resultsP[0]?.id_reservasi;
 
+              // test
+
               connection.query(
                 `select * from reservasi where id = ${id_reservasi}`,
                 (errR, resultsR) => {

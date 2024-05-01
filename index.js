@@ -275,7 +275,7 @@ app.post("/xendit-payment", (req, res) => {
             if (errP) {
               res.json({ message: "error" });
             } else {
-              const id_reservasi = resultsP[0]?.id_reservasi;
+              const id_reservasi = resultsP[0].id_reservasi;
 
               // test
 
@@ -285,7 +285,7 @@ app.post("/xendit-payment", (req, res) => {
                   if (errR) {
                     res.json({ message: "error" });
                   } else {
-                    const email_reservasi = resultsR[0]?.email;
+                    const email_reservasi = resultsR[0].email;
                     const transport = nodemailer.createTransport({
                       port: 465, // true for 465, false for other ports
                       host: "smtp.gmail.com",

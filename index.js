@@ -2,7 +2,10 @@ import express from "express";
 import cors from "cors";
 import connection from "./database/index.js";
 import nodemailer from "nodemailer";
-import { getTemplateEmail } from "./constant/index.js";
+import {
+  getTemplateEmail,
+  getTemplateEmailPembayaran,
+} from "./constant/index.js";
 
 const app = express();
 
@@ -258,7 +261,6 @@ app.post("/create-payment", (req, res) => {
 });
 
 app.post("/xendit-payment", (req, res) => {
-  console.log(req.body);
   const { external_id } = req.body;
 
   connection.query(
@@ -267,27 +269,48 @@ app.post("/xendit-payment", (req, res) => {
       if (err) {
         res.json({ message: "error" });
       } else {
-        const transport = nodemailer.createTransport({
-          port: 465, // true for 465, false for other ports
-          host: "smtp.gmail.com",
-          auth: {
-            user: email_gmail,
-            pass: pass_gmail,
-          },
-          secure: true,
-        });
+        connection.query(
+          `select * from payment where external_id = '${external_id}'`,
+          (errP, resultsP) => {
+            if (errP) {
+              res.json({ message: "error" });
+            } else {
+              const id_reservasi = resultsP[0]?.id_reservasi;
 
-        transport
-          .sendMail(getTemplateEmailPembayaran(email))
-          .then(() => {
-            console.log("success");
-            res.json({ message: "success payment" });
-          })
-          .catch(() => {
-            res.json({
-              message: "ERROR",
-            });
-          });
+              connection.query(
+                `select * from reservasi where id = ${id_reservasi}`,
+                (errR, resultsR) => {
+                  if (errR) {
+                    res.json({ message: "error" });
+                  } else {
+                    const email_reservasi = resultsR[0]?.email;
+                    const transport = nodemailer.createTransport({
+                      port: 465, // true for 465, false for other ports
+                      host: "smtp.gmail.com",
+                      auth: {
+                        user: email_gmail,
+                        pass: pass_gmail,
+                      },
+                      secure: true,
+                    });
+
+                    transport
+                      .sendMail(getTemplateEmailPembayaran(email_reservasi))
+                      .then(() => {
+                        console.log("success");
+                        res.json({ message: "success payment" });
+                      })
+                      .catch(() => {
+                        res.json({
+                          message: "ERROR",
+                        });
+                      });
+                  }
+                }
+              );
+            }
+          }
+        );
       }
     }
   );

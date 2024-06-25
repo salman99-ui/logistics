@@ -1,5 +1,5 @@
 export const getTemplateEmail = (email) => ({
-  from: "slmndamanhuri@gmail.com", // sender address
+  from: "ahassnabila4@gmail.com", // sender address
   to: email, // list of receivers
   subject: "Email Pemesanan Servis",
   text: "That was easy!",
@@ -8,7 +8,7 @@ export const getTemplateEmail = (email) => ({
 });
 
 export const getTemplateEmailPembayaran = (email) => ({
-  from: "slmndamanhuri@gmail.com", // sender address
+  from: "ahassnabila4@gmail.com", // sender address
   to: email, // list of receivers
   subject: "Email Pembayaran Servis",
   text: "That was easy!",

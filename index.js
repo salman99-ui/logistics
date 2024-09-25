@@ -1,10 +1,10 @@
-import app from './app.js'
-// import serverless from 'serverless-http'
+import app from "./app.js";
+import serverless from "serverless-http";
 
-// const handler = serverless(app)
+const handler = serverless(app);
 
-// export default handler
+export default handler;
 
-app.listen(4000, () => {
-  console.log("server running");
-});
+// app.listen(4000, () => {
+//   console.log("server running");
+// });

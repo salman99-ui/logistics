@@ -1,415 +1,162 @@
 import express from "express";
 import cors from "cors";
-import connection from "./database/index.js";
-import nodemailer from "nodemailer";
-import {
-  getTemplateEmail,
-  getTemplateEmailPembayaran,
-} from "./constant/index.js";
 
 const app = express();
-
-const email_gmail = "slmndamanhuri@gmail.com";
-const pass_gmail = "nwco ilfz xrnt otxz";
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/users", (req, res) => {
-  connection.query(`SELECT * FROM user`, (err, results) => {
-    if (err) {
-      res.json({ message: "error" });
-    } else {
-      res.json({
-        data: results,
-      });
-    }
+app.post("/manifest", (req, res) => {
+  const isNull = (data) => {
+    return data ? `'${data}'` : data;
+  };
+
+  const {
+    header: {
+      id_data,
+      nomor_aju,
+      npwp,
+      jns_manifest,
+      kd_jns_manifest,
+      kppbc,
+      no_bc_10,
+      tgl_bc_10,
+      no_bc_11,
+      tgl_bc_11,
+      nama_sarana_angkut,
+      kode_moda,
+      call_sign,
+      no_imo,
+      no_mms,
+      negara,
+      arrival,
+      departure_flight,
+      nahkoda,
+      handling_agent,
+      pelabuhan_awal,
+      pelabuhan_transit,
+      pelabuhan_bongkar,
+      pelabuhan_selanjutnya,
+      kade,
+      tgl_tiba,
+      jam_tiba,
+      tgl_kedatangan,
+      jam_kedatangan,
+      tgl_bongkar,
+      jam_bongkar,
+      tgl_muat,
+      jam_muat,
+      tgl_keberangkatan,
+      jam_keberangkatan,
+      total_pos,
+      total_kemasan,
+      total_kontainer,
+      total_master_bl,
+      total_bruto,
+      total_volume,
+      flag_nihil,
+      status,
+      no_perbaikan,
+      tgl_perbaikan,
+      seri_perbaikan,
+      pemberitahu,
+      lengkap,
+      user,
+      id_asal_data,
+      id_modul,
+      waktu_rekam,
+      waktu_update,
+      versi_modul,
+    },
+    master: {
+      id_master,
+      id_header,
+      kd_kelompok_pos,
+      no_master_bl_awb,
+      tgl_master_bl_awb,
+      jumlah_host_bl_awb,
+      status_detail,
+      respon,
+    },
+  } = req.body;
+
+  const data_npwp = isNull(npwp);
+  const data_jns_manifest = isNull(jns_manifest);
+  const data_kd_jns_manifest = isNull(kd_jns_manifest);
+  const data_kppbc = isNull(kppbc);
+  const data_no_bc_10 = isNull(no_bc_10);
+  const data_tgl_bc_10 = isNull(tgl_bc_10);
+  const data_no_bc_11 = isNull(no_bc_11);
+  const data_tgl_bc_11 = isNull(tgl_bc_11);
+  const data_nama_sarana_angkut = isNull(nama_sarana_angkut);
+  const data_kode_moda = isNull(kode_moda);
+  const data_call_sign = isNull(call_sign);
+  const data_no_imo = isNull(no_imo);
+  const data_no_mms = isNull(no_mms);
+  const data_negara = isNull(negara);
+  const data_arrival = isNull(arrival);
+  const data_departure_flight = isNull(departure_flight);
+  const data_nahkoda = isNull(nahkoda);
+  const data_handling_agent = isNull(handling_agent);
+  const data_pelabuhan_awal = isNull(pelabuhan_awal);
+  const data_pelabuhan_transit = isNull(pelabuhan_transit);
+  const data_pelabuhan_bongkar = isNull(pelabuhan_bongkar);
+  const data_pelabuhan_selanjutnya = isNull(pelabuhan_selanjutnya);
+  const data_kade = isNull(kade);
+  const data_tgl_tiba = isNull(tgl_tiba);
+  const data_jam_tiba = isNull(jam_tiba);
+  const data_tgl_kedatangan = isNull(tgl_kedatangan);
+  const data_jam_kedatangan = isNull(jam_kedatangan);
+  const data_tgl_bongkar = isNull(tgl_bongkar);
+  const data_jam_bongkar = isNull(jam_bongkar);
+  const data_tgl_muat = isNull(tgl_muat);
+  const data_jam_muat = isNull(jam_muat);
+  const data_tgl_keberangkatan = isNull(tgl_keberangkatan);
+  const data_jam_keberangkatan = isNull(jam_keberangkatan);
+  const data_total_pos = isNull(total_pos);
+  const data_total_kemasan = isNull(total_kemasan);
+  const data_total_kontainer = isNull(total_kontainer);
+  const data_total_master_bl = isNull(total_master_bl);
+  const data_total_bruto = isNull(total_bruto);
+  const data_total_volume = isNull(total_volume);
+  const data_flag_nihil = isNull(flag_nihil);
+  const data_status = isNull(status);
+  const data_no_perbaikan = isNull(no_perbaikan);
+  const data_tgl_perbaikan = isNull(tgl_perbaikan);
+  const data_seri_perbaikan = isNull(seri_perbaikan);
+  const data_pemberitahu = isNull(pemberitahu);
+  const data_lengkap = isNull(lengkap);
+  const data_user = isNull(user);
+  const data_id_asal_data = isNull(id_asal_data);
+  const data_id_modul = isNull(id_modul);
+  const data_waktu_rekam = isNull(waktu_rekam);
+  const data_waktu_update = isNull(waktu_update);
+  const data_versi_modul = isNull(versi_modul);
+
+  const insertStrHeader = `insert into header values( ${id_data} , '${nomor_aju}' , ${data_npwp} , ${data_jns_manifest} ,${data_kd_jns_manifest},${data_kppbc}  , ${data_no_bc_10} , ${data_tgl_bc_10} ,${data_no_bc_11} , ${data_tgl_bc_11} ,${data_nama_sarana_angkut} ,${data_kode_moda}  , ${data_call_sign} , ${data_no_imo}  , ${data_no_mms} , ${data_negara}  ,${data_arrival} ,${data_departure_flight} ,${data_nahkoda} ,${data_handling_agent} ,${data_pelabuhan_awal} ,${data_pelabuhan_transit} ,${data_pelabuhan_bongkar},${data_pelabuhan_selanjutnya} ,${data_kade} ,${data_tgl_tiba} ,${data_jam_tiba} ,${data_tgl_kedatangan} ,${data_jam_kedatangan} ,${data_tgl_bongkar} ,${data_jam_bongkar} ,${data_tgl_muat} ,${data_jam_muat} , ${data_tgl_keberangkatan} ,${data_jam_keberangkatan}  , ${data_total_pos} , ${data_total_kemasan} , ${data_total_kontainer} , ${data_total_master_bl} , ${data_total_bruto} ,${data_total_volume} , ${data_flag_nihil}, ${data_status} ,${data_no_perbaikan} ,${data_tgl_perbaikan},  ${data_seri_perbaikan} , ${data_pemberitahu},${data_lengkap}, ${data_user},${data_id_asal_data} ,${data_id_modul}, ${data_waktu_rekam}, ${data_waktu_update} ,${data_versi_modul})`;
+
+  // Master
+
+  const data_kd_kelompok_pos = isNull(kd_kelompok_pos);
+  const data_no_master_bl_awb = isNull(no_master_bl_awb);
+  const data_tgl_master_bl_awb = isNull(tgl_master_bl_awb);
+  const data_jumlah_host_bl_awb = isNull(jumlah_host_bl_awb);
+  const data_status_detail = isNull(status_detail);
+  const data_respon = isNull(respon);
+
+  const insertStrMaster = `insert into master values(${id_master},${id_header},${nomor_aju},${data_kd_kelompok_pos},${data_no_master_bl_awb},${data_tgl_master_bl_awb},${data_jumlah_host_bl_awb},${data_status_detail},${data_respon})`;
+
+  // Detail
+
+  // Barang
+
+  res.status(200).json({
+    message: {
+      header: insertStrHeader,
+      master: insertStrMaster,
+    },
   });
-});
-
-app.get("/profile/:id", (req, res) => {
-  const { id } = req.params;
-
-  connection.query(`SELECT * FROM user where id = ${id}`, (err, results) => {
-    if (results) {
-      res.json({ data: results });
-    } else {
-      res.json({
-        message: "error",
-      });
-    }
-  });
-});
-
-app.post("/login", (req, res) => {
-  const queryData = req.body;
-  connection.query(
-    `select * from user where email = '${queryData.email}' and password = '${queryData.password}'`,
-    (err, results) => {
-      if (results) {
-        res.json({ data: results[0] });
-      } else {
-        console.log(err);
-        res.json({
-          message: "error",
-        });
-      }
-    }
-  );
-});
-
-app.post("/create-user", (req, res) => {
-  const { nama, email, password } = req.body;
-  connection.query(
-    `insert into user (nama,email,role,password) values('${nama}','${email}',2,'${password}')`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({ message: "Success" });
-      }
-    }
-  );
-  connection.end();
-});
-
-// app.post("/test-email", (req, res) => {
-//   const email = "slmndamanhuri@gmail.com";
-//   const transport = nodemailer.createTransport({
-//     port: 465, // true for 465, false for other ports
-//     host: "smtp.gmail.com",
-//     auth: {
-//       user: "slmndamanhuri@gmail.com",
-//       pass: "nwco ilfz xrnt otxz",
-//     },
-//     secure: true,
-//   });
-
-//   transport
-//     .sendMail(getTemplateEmail(email))
-//     .then(() => {
-//       res.json({
-//         message: "OK",
-//       });
-//     })
-//     .catch(() => {
-//       res.json({
-//         message: "ERROR",
-//       });
-//     });
-// });
-
-app.post("/reservasi", (req, res) => {
-  // select * from reservasi left join item_part on reservasi.id = item_part.id_reservasi;
-  const { user_id, nama, email, alamat, date } = req.body;
-  connection.query(
-    `insert into reservasi(user_id,nama,email,alamat,date,status) values(${user_id},'${nama}','${email}','${alamat}','${date}','WAITING')`,
-    (errInsert, resultsInsert) => {
-      if (errInsert) {
-        console.log("err 2");
-        res.json({ message: "error" });
-      } else {
-        const transport = nodemailer.createTransport({
-          port: 465, // true for 465, false for other ports
-          host: "smtp.gmail.com",
-          auth: {
-            user: email_gmail,
-            pass: pass_gmail,
-          },
-          secure: true,
-        });
-
-        transport
-          .sendMail(getTemplateEmail(email))
-          .then(() => {
-            console.log("success");
-            res.json({
-              message: "OK",
-              id: resultsInsert.insertId,
-            });
-          })
-          .catch(() => {
-            res.json({
-              message: "ERROR",
-            });
-          });
-      }
-    }
-  );
-});
-
-app.get("/reservasi/:id", (req, res) => {
-  const { id } = req.params;
-  connection.query(
-    `select reservasi.* , payment.id as p_id, payment.status as p_status, payment.external_id as p_external_id , payment.va as p_va , payment.id_reservasi as p_id_reservasi , payment.va , payment.bank_code , payment.price , payment.status as p_status from reservasi left join payment on reservasi.id = payment.id_reservasi where reservasi.id = ${id}`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({
-          data: results[1] ? results[1] : results[0],
-        });
-      }
-    }
-  );
-});
-
-app.get("/total-transaksi/payment", (req, res) => {
-  connection.query(
-    `select sum(price) as total from payment where status = 'DONE'`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({
-          data: results[0].total,
-        });
-      }
-    }
-  );
-});
-
-app.get("/total-transaksi", (req, res) => {
-  connection.query(
-    `select count(*) as total from payment where status = 'DONE'`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({
-          data: results[0].total,
-        });
-      }
-    }
-  );
-});
-
-app.post("/create-va", async (req, res) => {
-  const { id_payment, account_number, bank_code, external_id } = req.body;
-
-  connection.query(
-    `update payment set status = 'WAITING',external_id = '${external_id}', va = '${account_number}', bank_code = '${bank_code}' where id_reservasi = ${id_payment} `,
-    (err, responseData) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({ data: "success" });
-      }
-    }
-  );
-});
-
-app.post("/create-payment", (req, res) => {
-  console.log(req.body);
-  const { id, external_id, amount } = req.body;
-  connection.query(
-    `insert into payment(id_reservasi,external_id,price,status) values(${id},'${external_id}',${amount},'WAITING')`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        // update is have VA
-        res.json({ message: "success create payment" });
-      }
-    }
-  );
-});
-
-app.post("/callback-va", (req, res) => {
-  const { data } = req.body;
-  connection.query(
-    `select * from payment where external_id = '${data.ReferenceId}'`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        connection.query(
-          `update payment set va = '${data.PaymentNo}' , bank_code = '${data.Channel}' where id = ${results[0].id}`,
-          (errs, results2) => {
-            if (errs) {
-              res.json({ message: "error" });
-            } else {
-              res.json({
-                message: "success",
-              });
-            }
-          }
-        );
-      }
-    }
-  );
-});
-
-app.post("/callback-va-success", (req, res) => {
-  const { reference_id } = req.body;
-  connection.query(
-    `select * from payment where external_id = '${reference_id}'`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        connection.query(
-          `update payment set status = 'DONE' where id = ${results[0].id}`,
-          (errs, results2) => {
-            if (errs) {
-              res.json({ message: "error" });
-            } else {
-              res.json({
-                message: "success",
-              });
-            }
-          }
-        );
-      }
-    }
-  );
-});
-
-app.post("/xendit-payment", (req, res) => {
-  const { external_id } = req.body;
-
-  connection.query(
-    `update payment set status = 'DONE' where external_id = '${external_id}'`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        connection.query(
-          `select * from payment where external_id = '${external_id}'`,
-          (errP, resultsP) => {
-            if (errP) {
-              res.json({ message: "error" });
-            } else {
-              const id_reservasi = resultsP[0]?.id_reservasi;
-
-              // test
-
-              connection.query(
-                `select * from reservasi where id = ${id_reservasi}`,
-                (errR, resultsR) => {
-                  if (errR) {
-                    res.json({ message: "error" });
-                  } else {
-                    const email_reservasi = resultsR[0]?.email;
-                    const transport = nodemailer.createTransport({
-                      port: 465, // true for 465, false for other ports
-                      host: "smtp.gmail.com",
-                      auth: {
-                        user: email_gmail,
-                        pass: pass_gmail,
-                      },
-                      secure: true,
-                    });
-
-                    transport
-                      .sendMail(getTemplateEmailPembayaran(email_reservasi))
-                      .then(() => {
-                        console.log("success");
-                        res.json({ message: "success payment" });
-                      })
-                      .catch(() => {
-                        res.json({
-                          message: "ERROR",
-                        });
-                      });
-                  }
-                }
-              );
-            }
-          }
-        );
-      }
-    }
-  );
-});
-
-// app.post("/update-payment", (req, res) => {
-//   const { external_id, account_number, expected_amount, bank_code } = req.body;
-// });
-
-app.get("/transaction-history/:user_id", (req, res) => {
-  const { user_id } = req.params;
-  connection.query(
-    `select * from reservasi where user_id = ${user_id}`,
-    (err, results) => {
-      if (err) {
-        console.log(err);
-        res.json({ message: "error" });
-      } else {
-        res.json({ data: results });
-      }
-    }
-  );
-});
-
-app.get("/transaction-history", (req, res) => {
-  connection.query(
-    `select reservasi.* , payment.status as p_status from reservasi left join payment on reservasi.id = payment.id_reservasi;`,
-    (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      } else {
-        res.json({ data: results });
-      }
-    }
-  );
-});
-
-app.post("/update-reservasi/:id", (req, res) => {
-  const { id } = req.params;
-  const { status, parts, price } = req.body;
-
-  if (status === "process") {
-    connection.query(
-      `UPDATE reservasi set status = 'PROCESS' where id = ${id}`,
-      (err, results) => {
-        if (err) {
-          res.json({ message: "error" });
-        } else {
-          res.json({
-            message: "success",
-          });
-        }
-      }
-    );
-  } else {
-    let stringSQL = "INSERT INTO item_part(id_reservasi,part,qty,price) Values";
-    parts.forEach((item, index) => {
-      stringSQL += `(${id},'${item.part}',${item.qty},${item.price})${
-        parts.length !== index + 1 ? "," : ""
-      }`;
-    });
-
-    connection.query(stringSQL, (err, results) => {
-      if (err) {
-        res.json({ message: "error" });
-      }
-      if (results) {
-        connection.query(
-          `UPDATE reservasi set status = 'DONE' , amount = ${price} where id = ${id}`,
-          (errUpdate, results) => {
-            if (errUpdate) {
-              res.json({ message: "error" });
-            } else {
-              connection.query(
-                `insert into payment(id_reservasi,status,price) values(${id},'WAITING',${price})`,
-                (errP, responseP) => {
-                  if (errP) {
-                    res.json({ message: "error disni" });
-                  } else {
-                    res.json({
-                      message: "success",
-                    });
-                  }
-                }
-              );
-            }
-          }
-        );
-      }
-    });
-  }
 });
 
 export default app;

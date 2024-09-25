@@ -1,0 +1,1 @@
+const table = "create table barang(id_barang int not null , id_detail int not null ,seri_barang int ,	hs_code varchar(255) , uraian_barang varchar(255) , primary key (id_barang))"

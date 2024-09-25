@@ -1,0 +1,1 @@
+const table = "create table master(id_master int not null , id_header int not null , nomor_aju varchar(255) not null , kd_kelompok_pos varchar(255) , no_master_bl_awb varchar(255) , tgl_master_bl_awb date , jumlah_host_bl_awb int , status_detail int ,respon varchar(255) , primary key(id_master))"
